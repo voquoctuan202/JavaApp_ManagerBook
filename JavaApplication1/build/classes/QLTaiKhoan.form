@@ -46,11 +46,9 @@
                               </Group>
                               <Component id="txtSDT" alignment="0" pref="195" max="32767" attributes="0"/>
                               <Component id="txtEmail" alignment="0" pref="195" max="32767" attributes="0"/>
-                              <Group type="103" alignment="1" groupAlignment="1" max="-2" attributes="0">
-                                  <Component id="txtTenND" alignment="0" pref="195" max="32767" attributes="0"/>
-                                  <Component id="txtMatKhau" alignment="0" pref="195" max="32767" attributes="0"/>
-                                  <Component id="txtTenTK" alignment="0" pref="195" max="32767" attributes="0"/>
-                              </Group>
+                              <Component id="txtTenND" alignment="0" pref="195" max="32767" attributes="0"/>
+                              <Component id="txtMatKhau" alignment="0" pref="195" max="32767" attributes="0"/>
+                              <Component id="txtTenTK" alignment="0" pref="195" max="32767" attributes="0"/>
                               <Component id="cbQuyen" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>

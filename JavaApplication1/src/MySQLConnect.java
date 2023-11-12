@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
+import java.sql.Types;
+import java.util.ArrayList;
 
 public class MySQLConnect {
     
@@ -27,7 +30,9 @@ public class MySQLConnect {
      }
     public static void main(String[] args) throws SQLException {
         Connection connection = getJDBCConnection();
-   
+        Login obj = null;
+        obj = new Login();
+        obj.setVisible(true);
         if (connection != null) {
             System.out.println("Data connection successful");
         } else {
@@ -47,50 +52,7 @@ public class MySQLConnect {
         }
         return rs;
     }
-    public int createNewID(String tableName) throws SQLException{
-      ResultSet rs = null;  
-      Connection conn = getJDBCConnection();
-      
-      PreparedStatement statement = null;
-      int s = 0;
-      switch (tableName) { //mã sách được nhập nên không cần tạo ID
-        case "PhieuMuon":
-            statement = conn.prepareStatement("SELECT * FROM PhieuMuon");
-            rs = statement.executeQuery();
-       
-            while(rs.next()){
-                s = rs.getInt("maPhieumuon"); //lấy mã độc giả ở vị trí cuối cùng
-            }
-            return s+1; //cộng thêm một để tạo ra ID mới
-
-        case "TaiKhoan":
-            statement = conn.prepareStatement("SELECT * FROM TaiKhoan");
-            rs = statement.executeQuery();
-       
-            while(rs.next()){
-                s = rs.getInt("maTK");
-            }
-            return s+1;
-        case "DocGia":
-            statement = conn.prepareStatement("SELECT * FROM DocGia");
-            rs = statement.executeQuery();
-       
-            while(rs.next()){
-                s = rs.getInt("maDocGia");
-            }
-            return s+1;
-        case "QuanLy":
-            statement = conn.prepareStatement("SELECT * FROM QuanLy");
-            rs = statement.executeQuery();
-       
-            while(rs.next()){
-                s = rs.getInt("maQuanLy");
-            }
-            return s+1;
-        }
-    
-      return 999;
-    }
+   
     
     public int ExcuteSQLInsert(String[] stringsSQL) throws SQLException{
         int rowsInserted =0;
@@ -133,6 +95,61 @@ public class MySQLConnect {
         }     
         return rowsDeleted ;
     }
+    public int DeleteSach(String[] stringsSQL) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call DeleteSach(?,?)}");
+        cStmt.setString(1,stringsSQL[0]);
+      
+        int i=0;
+        cStmt.registerOutParameter(2, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(2);
+        
+        
+    }
+    public int InsertSach(String[] stringsSQL) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call InsertSach(?,?,?,?,?,?,?,?,?,?)}");
+        cStmt.setString(1,stringsSQL[0]);
+        cStmt.setString(2,stringsSQL[1]);
+        cStmt.setString(3,stringsSQL[2]);
+        cStmt.setString(4,stringsSQL[3]);
+        cStmt.setString(5,stringsSQL[4]);
+        cStmt.setString(6,stringsSQL[5]);
+        cStmt.setString(7,stringsSQL[6]);
+        cStmt.setString(8,stringsSQL[7]);
+        cStmt.setString(9,stringsSQL[8]);
+        int i=0;
+        cStmt.registerOutParameter(10, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(10);
+        
+        
+    }
+    public int UpdateSach(String[] stringsSQL) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call UpdateSach(?,?,?,?,?,?,?,?,?,?)}");
+        cStmt.setString(1,stringsSQL[0]);
+        cStmt.setString(2,stringsSQL[1]);
+        cStmt.setString(3,stringsSQL[2]);
+        cStmt.setString(4,stringsSQL[3]);
+        cStmt.setString(5,stringsSQL[4]);
+        cStmt.setString(6,stringsSQL[5]);
+        cStmt.setString(7,stringsSQL[6]);
+        cStmt.setString(8,stringsSQL[7]);
+        cStmt.setString(9,stringsSQL[8]);
+        cStmt.registerOutParameter(10, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(10);
+        
+        
+    }
     public int ExcuteSQLUpdate(String[] stringsSQL) throws SQLException{
         int rowsUpdated =0;
         Connection conn = getJDBCConnection();
@@ -161,41 +178,22 @@ public class MySQLConnect {
     public int ExcuteSQLDuyetPhieuMuon(int maPhieu,String ghichu) throws SQLException{
         int rowsUpdated =0;
         Connection conn = getJDBCConnection();
-        String sql = "UPDATE muonsach SET tinhtrang = 'datra',ghichu=? WHERE maPhieumuon=?";
+        String sql = "UPDATE muonsach SET tinhtrang = 'Đã trả',ghichu=? WHERE maPhieumuon=?";
         
         PreparedStatement statement;
         try{
             statement =  conn.prepareStatement(sql);
             statement.setString(1,ghichu);
             statement.setInt(2,maPhieu);
-            
-            
-            
             rowsUpdated = statement.executeUpdate();
+            
+            this.setTraSach(this.getDSByMaPhieu(maPhieu));
         }catch (SQLException ex){
             System.out.print(ex);
         }     
         return rowsUpdated ;
     }
-    public int ExcuteSQLDuyetSachmuon(int stt,String ghichu) throws SQLException{
-        int rowsUpdated =0;
-        Connection conn = getJDBCConnection();
-        String sql = "UPDATE muonsach SET tinhtrang = 'datra',ghichu=? WHERE stt=?";
-        
-        PreparedStatement statement;
-        try{
-            statement =  conn.prepareStatement(sql);
-            statement.setString(1,ghichu);
-            statement.setInt(2,stt);
-            
-            
-            
-            rowsUpdated = statement.executeUpdate();
-        }catch (SQLException ex){
-            System.out.print(ex);
-        }     
-        return rowsUpdated ;
-    }
+    
     
     public int ExcuteSQLDeleteTaiKhoan(int matk,String quyen) throws SQLException{
         int rowsDeleted1 =0;
@@ -242,7 +240,7 @@ public class MySQLConnect {
             sql1 = "UPDATE DocGia SET tenDocgia=?, email=?, sdt=?  WHERE maTK=?";
             sql2 = "UPDATE TaiKhoan SET tenTaiKhoan=?, matkhau=? WHERE maTK=?";
         }else{
-            sql1 =  "UPDATE QuanLy SET tenDocgia=?, email=?, sdt=?  WHERE maTK=?";
+            sql1 =  "UPDATE QuanLy SET tenQuanly=?, email=?, sdt=?  WHERE maTK=?";
             sql2 =  "UPDATE TaiKhoan SET tenTaiKhoan=?, matkhau=? WHERE maTK=?";
         }
         
@@ -268,6 +266,262 @@ public class MySQLConnect {
         }     
         return rowsUpdated2 + rowsUpdated1 ;
     }
+    
+    
+    
+    public int GetAccountByTenTk(String tenTK) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call getmatk(?,?)}");
+        cStmt.setString(1,tenTK);
+        
+        cStmt.registerOutParameter(2, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(2);
+       
+    }
+    public void CreateDocGia(int maTK,String tenDocgia,String email, String sdt) throws SQLException{
+        int rowsInserted =0;
+        Connection conn = getJDBCConnection();
+        String sql = "INSERT INTO DocGia(maTK,tenDocGia,email,sdt) VALUES(?,?,?,?)";
+        
+        PreparedStatement statement;
+        try{
+            statement =conn.prepareStatement(sql);
+            statement.setInt(1,maTK);
+            statement.setString(2,tenDocgia);
+            statement.setString(3,email);
+            statement.setString(4,sdt);
+           
+            rowsInserted = statement.executeUpdate();
+            
+            
+        }catch (SQLException ex){
+            System.out.print(ex);
+        }     
+        
+    }
+    public int Register(String[] stringsTK) throws SQLException{
+        int rowsInserted =0;
+        Connection conn = getJDBCConnection();
+        String sql = "INSERT INTO TAIKHOAN(tenTaiKhoan,matkhau) VALUES(?,?)";
+        
+        PreparedStatement statement;
+        try{
+            statement =conn.prepareStatement(sql);
+            statement.setString(1,stringsTK[0]);
+            statement.setString(2,stringsTK[4]);
+           
+            rowsInserted = statement.executeUpdate();
+            
+            int matk = this.GetAccountByTenTk(stringsTK[0]);
+            this.CreateDocGia(matk,stringsTK[3] , stringsTK[2], stringsTK[1]);
+            
+        }catch (SQLException ex){
+            System.out.print(ex);
+        }     
+        return rowsInserted;
+    }
+    
+    //Login
+    public String[] Login(String[] stringsTK) throws SQLException{
+        Connection conn = getJDBCConnection();
+        String sql = "SELECT * FROM taikhoan WHERE tenTaiKhoan='"+ stringsTK[0] + "' and matkhau='"+ stringsTK[1]+"' and quyen='"+stringsTK[2]+"';";
+        ResultSet rs = null;
+        PreparedStatement statement;
+        try{
+            statement = conn.prepareStatement(sql);
+            rs = statement.executeQuery(sql);
+            if(rs.next()){
+                String quyen = rs.getString("quyen");
+                String tenTK = rs.getString("tenTaiKhoan");
+             
+                String[] kq = {tenTK,quyen};  
+                return kq;   
+            }
+            
+        }catch(SQLException ex){
+             System.out.print(ex);
+        }
+        return null;
+    }
+    public int createNewID(String tableName) throws SQLException{
+      ResultSet rs = null;  
+      Connection conn = getJDBCConnection();
+      
+      PreparedStatement statement = null;
+      int s = 0;
+      switch (tableName) { //mã sách được nhập nên không cần tạo ID
+        case "muonsach":
+            statement = conn.prepareStatement("SELECT * FROM muonsach");
+            rs = statement.executeQuery();
+       
+            while(rs.next()){
+                s = rs.getInt("maPhieumuon"); //lấy mã độc giả ở vị trí cuối cùng
+            }
+            return s+1; //cộng thêm một để tạo ra ID mới
+
+        case "TaiKhoan":
+            statement = conn.prepareStatement("SELECT * FROM TaiKhoan");
+            rs = statement.executeQuery();
+       
+            while(rs.next()){
+                s = rs.getInt("maTK");
+            }
+            return s+1;
+        case "DocGia":
+            statement = conn.prepareStatement("SELECT * FROM DocGia");
+            rs = statement.executeQuery();
+       
+            while(rs.next()){
+                s = rs.getInt("maDocGia");
+            }
+            return s+1;
+        case "QuanLy":
+            statement = conn.prepareStatement("SELECT * FROM QuanLy");
+            rs = statement.executeQuery();
+       
+            while(rs.next()){
+                s = rs.getInt("maQuanLy");
+            }
+            return s+1;
+        }
+    
+      return 999;
+    }
+    
+    public String getTenDocGiaByTK(String tentk) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call getTenDocGiaByTK(?,?)}");
+        cStmt.setString(1,tentk);
+        
+        cStmt.registerOutParameter(2, Types.VARCHAR); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getString(2);
+       
+    }
+    
+    public int getMaDocGiaByTK(String tentk) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call getMaDocGiaByTK(?,?)}");
+        cStmt.setString(1,tentk);
+        
+        cStmt.registerOutParameter(2, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(2);
+       
+    }
+   
+    
+    
+    public void createPhieumuon(int maPhieumuon,int maDocGia,String maSach, String ngaymuon, String ngaytra) throws SQLException{
+        int rowsInserted =0;
+        Connection conn = getJDBCConnection();
+        String sql = "INSERT INTO muonsach(maPhieuMuon,maDocGia,maSach,ngayMuon,ngayTra,tinhtrang) VALUES(?,?,?,?,?,'Đang mượn')";
+        
+        PreparedStatement statement;
+        try{
+            statement =conn.prepareStatement(sql);
+            statement.setInt(1,maPhieumuon);
+            statement.setInt(2,maDocGia);
+            statement.setString(3,maSach);
+            statement.setString(4,ngaymuon);
+            statement.setString(5,ngaytra);
+           
+            rowsInserted = statement.executeUpdate();
+            
+            
+        }catch (SQLException ex){
+            System.out.print(ex);
+        } 
+    }
+    public void setTrangThaiSach(String ms, String trangthai) throws SQLException{
+       
+        Connection conn = getJDBCConnection();
+        String sql = "UPDATE sach SET tinhtrang=? WHERE maSach=?";
+        
+        PreparedStatement statement;
+        try{
+            statement =  conn.prepareStatement(sql);
+            statement.setString(1,trangthai);
+            statement.setString(2,ms);
+            
+            statement.executeUpdate();
+        }catch (SQLException ex){
+            System.out.print(ex);
+        }     
+        
+    }
+    
+    public int IsDangMuon(int maphieu) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call IsDangMuon(?,?)}");
+        cStmt.setInt(1,maphieu);
+        
+        cStmt.registerOutParameter(2, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(2);
+    }
+     public int IsNguoiMuon(int maphieu,int maDG) throws SQLException{
+        CallableStatement cStmt = null;
+        Connection conn = getJDBCConnection();
+        //call stored procedure "getBalance(IN username varchar(8), OUT balance int)"
+        cStmt = conn.prepareCall("{call IsNguoiMuon(?,?,?)}");
+        cStmt.setInt(1,maphieu);
+        cStmt.setInt(2,maDG);
+        
+        cStmt.registerOutParameter(3, Types.INTEGER); //đăng ký tham số OUT
+        cStmt.executeQuery(); //gọi thủ tục
+        return cStmt.getInt(3);
+    }
+    
+    
+    public int TraSach(int maphieu, String ghichu) throws SQLException{
+        int rowsUpdated =0;
+        Connection conn = getJDBCConnection();
+        String sql = "UPDATE muonsach SET tinhtrang = 'Đang duyệt',ghichu=? WHERE maPhieumuon=?";
+        
+        PreparedStatement statement;
+        try{
+            statement =  conn.prepareStatement(sql);
+            statement.setString(1,ghichu);
+            statement.setInt(2,maphieu);
+            
+            rowsUpdated = statement.executeUpdate();
+        }catch (SQLException ex){
+            System.out.print(ex);
+        }     
+        return rowsUpdated ;
+    }
+    public ArrayList<String> getDSByMaPhieu(int maphieu) throws SQLException{
+        ArrayList<String> ds = new ArrayList<String>();
+        ResultSet rs = this.getData("SELECT * FROM muonsach WHERE maPhieumuon = '"+maphieu+"';");
+        try{
+            while(rs.next()){
+                ds.add(rs.getString("maSach"));
+            }    
+          }catch(SQLException ex){
+              ex.printStackTrace();
+          }
+        return ds;
+    }
+    public void setTraSach(ArrayList<String> ds) throws SQLException{
+        int i;
+        String ms;
+        for(i=0;i<= ds.size()-1;i++){
+            ms = ds.get(i);
+            this.setTrangThaiSach(ms, "");
+        }
+    }
+    
+    
 
 }
 

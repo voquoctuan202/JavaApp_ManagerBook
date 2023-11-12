@@ -23,6 +23,7 @@ public class QLTaiKhoan extends javax.swing.JFrame {
      * Creates new form QLTaiKhoan
      */
     int matk =0;
+    int dAdmin = 0;
     MySQLConnect conn;
     public QLTaiKhoan() throws SQLException {
         initComponents();
@@ -44,7 +45,7 @@ public class QLTaiKhoan extends javax.swing.JFrame {
         String email="";
     
         
-        
+        ResultSet rsAdmin = conn.getData("select a.maTK,a.quyen from taikhoan as a;");
         ResultSet rsDG = conn.getData("select a.maTK,a.tenTaiKhoan,a.matkhau,b.tenDocgia,b.email,b.sdt,a.quyen\n" +
                                         "from taikhoan as a\n" +
                                         "join docgia as b\n" +
@@ -54,6 +55,20 @@ public class QLTaiKhoan extends javax.swing.JFrame {
                                         "join quanly as b\n" +
                                         "on b.maTK = a.maTK;");
         try{
+            while(rsAdmin.next()){
+                maTK = rsAdmin.getInt("maTK");
+                tenTK = "Admin";
+                matkhau = "";
+                tenND = "Admin";
+                sdt = "";
+                email = "";
+                quyen = rsAdmin.getString("quyen");
+
+                if(quyen.equals("Admin")){
+                    model.addRow(new Object[]{maTK,tenTK,matkhau,tenND, sdt,  email, quyen});
+                }
+                
+            } 
             while(rsDG.next()){
                 maTK = rsDG.getInt("maTK");
                 tenTK = rsDG.getString("tenTaiKhoan");
@@ -169,10 +184,15 @@ public class QLTaiKhoan extends javax.swing.JFrame {
         String quyen = tbTK.getValueAt(selectedRow, 6).toString();
         if(quyen.equals("Độc giả")){
             cbQuyen.setSelectedIndex(1);
-        }else{
-           cbQuyen.setSelectedIndex(2);
+            dAdmin =0;
         }
-        
+        if(quyen.equals("Quản lý")){
+           cbQuyen.setSelectedIndex(2);
+           dAdmin =0;
+        }
+        if(quyen.equals("Admin")){
+           dAdmin =1;
+        }
         txtTenND.setText(tbTK.getValueAt(selectedRow, 3).toString());
         txtEmail.setText(tbTK.getValueAt(selectedRow, 5).toString());
         txtSDT.setText(tbTK.getValueAt(selectedRow, 4).toString());
@@ -200,7 +220,12 @@ public class QLTaiKhoan extends javax.swing.JFrame {
         if(isDelete>0){
             JOptionPane.showMessageDialog(this, "Xóa thành công");
         }else{
-            JOptionPane.showMessageDialog(this, "Xóa thất bại, kiểm tra lại");
+            if(dAdmin ==1){
+                JOptionPane.showMessageDialog(this, "Bạn không thể xóa admin");
+            }else{
+                JOptionPane.showMessageDialog(this, "Xóa thất bại, kiểm tra lại");
+            }
+            
         }
         showData();
         ClearText();
@@ -218,7 +243,13 @@ public class QLTaiKhoan extends javax.swing.JFrame {
         if(isUpdate>0){
             JOptionPane.showMessageDialog(this, "Cập nhật thành công");
         }else{
-            JOptionPane.showMessageDialog(this, "Cập nhật thất bại, kiểm tra lại");
+            if(dAdmin ==1){
+                JOptionPane.showMessageDialog(this, "Bạn không thể thay đổi admin");
+            }else{
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại, kiểm tra lại");
+            }
+            
+            
         }
         showData();
         ClearText();

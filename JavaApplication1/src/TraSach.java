@@ -1,3 +1,10 @@
+
+import static java.lang.Integer.parseInt;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -12,10 +19,29 @@ public class TraSach extends javax.swing.JFrame {
     /**
      * Creates new form TraSach
      */
-    public TraSach() {
+    String tk;
+    MySQLConnect conn;
+    public TraSach(String tentk) {
         initComponents();
+        this.tk = tentk;
+        conn = new MySQLConnect();
     }
-
+    public void XacNhan() throws SQLException{
+        int maphieu =  parseInt(txtMaPhieumuon.getText());
+        String ghichu = txtGhichu.getText();
+        if(conn.IsDangMuon(maphieu)==1 && conn.IsNguoiMuon(maphieu, conn.getMaDocGiaByTK(tk))==1){
+            int isTraSach = conn.TraSach(maphieu, ghichu);
+            if(isTraSach>0){
+                JOptionPane.showMessageDialog(this, "Trả thành công, chờ 1 đến 2 ngày để xác nhận");
+                //conn.setTraSach(conn.getDSByMaPhieu(maphieu));
+            }else{
+                JOptionPane.showMessageDialog(this, "Mã phiếu không đúng");
+            }
+        }else{
+            JOptionPane.showMessageDialog(this, "Mã phiếu không hợp lệ");   
+        }
+        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -27,13 +53,13 @@ public class TraSach extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txtMaPhieumuon = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
+        txtGhichu = new javax.swing.JTextArea();
+        btnXacnhan = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        btnThoat = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -41,20 +67,31 @@ public class TraSach extends javax.swing.JFrame {
 
         jLabel2.setText("Mã phiếu mượn");
 
+        txtMaPhieumuon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtMaPhieumuonActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Ghi chú");
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        txtGhichu.setColumns(20);
+        txtGhichu.setRows(5);
+        jScrollPane1.setViewportView(txtGhichu);
 
-        jButton1.setText("Xác nhận");
+        btnXacnhan.setText("Xác nhận");
+        btnXacnhan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnXacnhanActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Chờ duyệt trả sách trong 1 đến 2 ngày");
 
-        jButton2.setText("Thoát");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnThoat.setText("Thoát");
+        btnThoat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnThoatActionPerformed(evt);
             }
         });
 
@@ -79,12 +116,11 @@ public class TraSach extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1))
+                        .addComponent(btnThoat)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnXacnhan))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jTextField1)
+                        .addComponent(txtMaPhieumuon)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE)))
                 .addContainerGap(24, Short.MAX_VALUE))
         );
@@ -96,16 +132,16 @@ public class TraSach extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMaPhieumuon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
+                    .addComponent(btnThoat)
+                    .addComponent(btnXacnhan))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addComponent(jLabel4)
                 .addGap(15, 15, 15))
         );
@@ -113,9 +149,30 @@ public class TraSach extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnThoatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnThoatActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+        this.dispose();
+        MuonSach obj = null;
+        try {
+            obj = new MuonSach(tk);
+        } catch (SQLException ex) {
+            Logger.getLogger(frmQuanLySach.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        obj.setVisible(true);
+    }//GEN-LAST:event_btnThoatActionPerformed
+
+    private void txtMaPhieumuonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaPhieumuonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtMaPhieumuonActionPerformed
+
+    private void btnXacnhanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnXacnhanActionPerformed
+        try {
+            // TODO add your handling code here:
+            XacNhan();
+        } catch (SQLException ex) {
+            Logger.getLogger(TraSach.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btnXacnhanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -147,20 +204,20 @@ public class TraSach extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new TraSach().setVisible(true);
+                new TraSach("").setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnThoat;
+    private javax.swing.JButton btnXacnhan;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextArea txtGhichu;
+    private javax.swing.JTextField txtMaPhieumuon;
     // End of variables declaration//GEN-END:variables
 }
